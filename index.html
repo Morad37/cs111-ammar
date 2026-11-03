@@ -818,7 +818,8 @@ function replay(q, rec){
 }
 
 function pickLine(arr){
-  return arr[(S.i * 3 + (arr === ROAST ? 1 : 0)) % arr.length];
+  // step must be coprime with the bank size, or the rotation visits only a fraction of it
+  return arr[(S.i * 5 + (arr === ROAST ? 1 : 0)) % arr.length];
 }
 
 function record(ok, pick){
