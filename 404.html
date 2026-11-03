@@ -638,7 +638,11 @@ const PRAISE = [
   "Oh look, he can read. Correct.",
   "Correct. Your only win today. Enjoy it, nothing else is coming.",
   "Yes. The bar was on the floor and you cleared it. So would anyone.",
-  "Right. Do it on the exam, where nobody is watching and nobody cares."
+  "Right. Do it on the exam, where nobody is watching and nobody cares.",
+  "Correct. Even Barcelona win a group game sometimes.",
+  "Right. Almost as rare as a Barcelona clean sheet.",
+  "Correct. Ronaldo would have got that one too, and that should worry you.",
+  "Correct. Messi would be proud. Messi is also not impressed by much."
 ];
 
 const ROAST = [
@@ -666,8 +670,24 @@ const ROAST = [
   "Wrong. You are getting absolutely nowhere, which is the story of your love life.",
   "Wrong. No wonder she does not reply. Look at what you just wrote.",
   "Wrong. Your dick has more ambition than your answer and that is saying something.",
-  "Wrong. You are not going to impress the examiner any more than you impress anyone else.",
-  "Wrong. Flat, quick and forgotten. Same as always."
+  "Wrong. Flat, quick and forgotten. Same as always.",
+  "Wrong. You are like Barcelona in Europe. Out early, and embarrassing.",
+  "Wrong. Barcelona have better finances than this answer, and Barcelona are broke.",
+  "Wrong. That answer went missing like Messi in a Champions League semi final.",
+  "Wrong. Eight conceded, two scored, and you still managed to do worse than that night in Lisbon.",
+  "Wrong. You collapsed harder than Barcelona against Roma. At least they had a first leg.",
+  "Wrong. That is a Liverpool four nil. You had it, then you absolutely shit yourself.",
+  "Wrong. Even Argentina needed penalties and a dodgy handball. You have not even got that far.",
+  "Wrong. You defend like Barcelona. Which is to say, you do not.",
+  "Wrong. You are in the Europa League of answers. Thursday nights, nobody watching, nobody caring.",
+  "Wrong. Ronaldo buries that. Ronaldo buries everything, and he does it without crying.",
+  "Wrong. Barcelona sold their future for this answer and still got nothing back.",
+  "Wrong. That answer is a Bartomeu signing. Expensive, useless, and gone in a year.",
+  "Wrong. Argentina won on penalties. Yours lost in normal time, to nobody.",
+  "Wrong. You support Barcelona and you still cannot pass. Sums your life up.",
+  "Wrong. Seven Ballon d'Ors for Messi, zero marks for you. Balance restored.",
+  "Wrong. That was worse than a Barcelona lever. And they did three of those.",
+  "Wrong. Barca are in debt, you are in the mud, and Messi is in Miami. Everyone is somewhere better than here."
 ];
 
 /* ==========================================================
@@ -926,7 +946,7 @@ function finish(){
   const title = win ? "AMMAR THE BANANA KING" : (S.lives <= 0 ? "THE DONKEY HAS ARRIVED" : "NOT QUITE, MATE");
   const sub = win
     ? "70% or above. Barely. You passed, which says more about the marking scheme than about you. Don't let it go to your head, the real paper is worse."
-    : "Under 70%. You failed a practice test you had the answers to. Your brain is not the problem, your effort is, and effort is the one thing you cannot fake.";
+    : "Under 70%. You failed a practice test you already had the answers to. You are the Barcelona of revision: big reputation, no result. Sit down, read the cheat sheet, run it again.";
 
   $("#scr-res").innerHTML = `
     <div class="res">
