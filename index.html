@@ -27,6 +27,11 @@ body{
 .top{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
 .brand{font-family:var(--mono);font-size:11px;letter-spacing:.22em;color:var(--lime);text-transform:uppercase;font-weight:700}
 .spacer{flex:1}
+.backbtn{background:transparent;border:1px solid var(--line);color:var(--ink);width:34px;height:34px;
+  border-radius:10px;font-size:17px;line-height:1;cursor:pointer;display:grid;place-items:center;
+  padding:0;flex:none;transition:border-color .12s,background .12s}
+.backbtn:hover{border-color:#3d5266;background:var(--panel2)}
+.backbtn:active{transform:scale(.95)}
 .bananas{font-size:17px;letter-spacing:2px;line-height:1}
 .banana.dead{opacity:.18;filter:grayscale(1)}
 .pill{font-family:var(--mono);font-size:11px;color:var(--muted);border:1px solid var(--line);
@@ -36,11 +41,17 @@ body{
 /* ---------- progress ---------- */
 .prog{display:flex;gap:6px;margin:0 0 6px}
 .prog span{flex:1;height:5px;border-radius:99px;background:var(--line);overflow:hidden;position:relative}
-.prog span i{position:absolute;inset:0;width:0;background:var(--lime);border-radius:99px;transition:width .35s ease}
+.prog span i{position:absolute;inset:0;width:var(--p,0%);background:var(--lime);border-radius:99px;transition:width .35s ease}
 .prog span.done i{width:100%}
 .prog span.now i{width:var(--p,0%);background:linear-gradient(90deg,var(--lime),var(--lime-dk))}
-.roundline{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;
+.roundline{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:10.5px;
   letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-bottom:20px}
+.qlabel{display:flex;align-items:center;gap:8px;letter-spacing:.06em;font-size:11px;color:var(--ink)}
+.navq{background:var(--panel);border:1px solid var(--line);color:var(--ink);width:28px;height:28px;
+  border-radius:9px;font-size:14px;line-height:1;cursor:pointer;display:grid;place-items:center;padding:0;
+  transition:border-color .12s,background .12s,opacity .12s}
+.navq:hover:not(:disabled){border-color:var(--lime);color:var(--lime)}
+.navq:disabled{opacity:.28;cursor:default}
 
 /* ---------- intro ---------- */
 .hero{text-align:center;padding:26px 0 8px}
@@ -185,19 +196,30 @@ textarea:focus{outline:0;border-color:var(--lime);box-shadow:0 0 0 3px rgba(184,
       <button class="btn btn-ghost" id="sheetBtn1">Cheat sheet</button>
       <button class="btn btn-ghost" id="zenBtn">Zen mode: off</button>
     </div>
+    <p class="tiny hide" id="resumeNote"></p>
+    <p class="tiny hide" id="restartLink" style="cursor:pointer;text-decoration:underline;color:var(--red)">Start over from question 1</p>
     <p class="tiny">3 bananas = your lives. Drop them all and you meet the donkey.</p>
+    <p class="tiny" style="opacity:.7">Stuck or bored? Hit the arrow at the top to leave. Your score is kept.</p>
   </section>
 
   <!-- ============ QUIZ ============ -->
   <section id="scr-quiz" class="hide">
     <div class="top">
+      <button class="backbtn" id="backBtn" aria-label="Back to home">&#8592;</button>
       <div class="brand">C-CS111</div>
       <div class="spacer"></div>
       <div class="bananas" id="livesBox"></div>
       <div class="pill" id="scoreBox">0</div>
     </div>
     <div class="prog" id="prog"></div>
-    <div class="roundline"><span id="roundName">Round</span><span id="qCount">1 / 36</span></div>
+    <div class="roundline">
+      <span id="roundName">Round</span>
+      <span class="qlabel">
+        <button class="navq" id="prevQ" title="Previous question" aria-label="Previous question">&#8592;</button>
+        <span id="qCount">1 / 36</span>
+        <button class="navq" id="nextQ" title="Next question" aria-label="Next question">&#8594;</button>
+      </span>
+    </div>
     <div id="qHost"></div>
   </section>
 
@@ -607,33 +629,44 @@ const SHEET = [
    3. LINES
    ========================================================== */
 const PRAISE = [
-  "Correct. Bananas for everyone.",
-  "Correct. The monkey nods. Do not let it go to your head.",
-  "Right. You actually read the slides. I am shocked, genuinely.",
-  "Clean. No drama, no bugs, no crying.",
-  "Correct. Doctor Doaa would be stunned into silence.",
-  "Yes. That is a mark in the bank, you little genius.",
-  "Correct first try. Suspicious. I am checking the cheat sheet tab.",
-  "Right again. Who are you and what have you done with Ammar?"
+  "Correct. Your only win today. Enjoy it, lord knows nothing else is coming.",
+  "Right. Even a broken clock is right twice a day.",
+  "Correct. Your brain works. Shame the rest of you does not.",
+  "Yes. One correct answer. Still not going to get you laid.",
+  "Right. Put it on your CV. It will do more for you than your personality.",
+  "Correct. Do not get excited, one mark does not fix the other 35 questions.",
+  "Oh look, he can read. Correct.",
+  "Correct. That is the smartest thing you have done all week, and it is not close.",
+  "Yes. The bar was on the floor and you cleared it. Well done, I guess.",
+  "Correct. Somewhere a monkey just fell off its chair in shock."
 ];
 
 const ROAST = [
-  "Wrong. Genuinely, impressively wrong. Sit there and think about what you did.",
-  "That answer was so shit it owes the compiler an apology.",
-  "The CPU read your answer and requested a holiday.",
-  "You picked that with total confidence. That is the terrifying part.",
-  "Nope. My nan's toaster would have got that one, and it is broken.",
-  "Wrong, you absolute donkey. The dunce cap is on the chair.",
-  "You just failed a question I wrote five minutes ago. Five minutes.",
-  "That was an F with extra steps and a bow on top.",
-  "Bold. Wrong. But bold. Respect for the confidence, none for the answer.",
-  "The semicolon you forgot is laughing at you right now.",
-  "If confusion were a language you would be fluent, and writing poetry.",
-  "Wrong again. At this rate the donkey gets a crown too.",
-  "Bro, that was not a guess, that was a cry for help.",
-  "Your answer has been forwarded to the head of department. She is not happy.",
-  "This is the kind of answer that makes the marker put the pen down and stare out the window.",
-  "Wrong. And you did not even hesitate. That is the worst bit."
+  "Wrong. Your answer is like your dick: tiny and disappointing.",
+  "That answer was so shit it owes the compiler a written apology.",
+  "You stupid idiot. It is on the slide. The slide literally in front of you.",
+  "Wrong. You could not get that right if your life depended on it, which is the same problem you have in bed.",
+  "Nope. My nan's toaster would have got that one, and the fucking thing is broken. Bit like you.",
+  "Wrong again. Small dick energy and an even smaller brain to match.",
+  "You just failed a question I wrote five minutes ago. You cannot even last five minutes, in any sense.",
+  "That was an F with extra steps and a bow on top, you idiot.",
+  "Your answer has the same problem as your dick. It does not reach.",
+  "Wrong. That is 0 out of 2 now, which is coincidentally the number of times you have finished anything.",
+  "You cannot do a for loop and you cannot fuck. Two things to work on, both of them urgent.",
+  "That is the answer that makes the marker put the pen down and stare out the window, you stupid fuck.",
+  "Wrong, and you did not even hesitate. You have clearly never hesitated about anything, because you have never lasted long enough to.",
+  "Fucking hell, Ammar. That was a masterpiece. Your dick is a masterpiece too, if the masterpiece is tiny.",
+  "You have two brain cells and they are both fighting for third place. So is your dick, and it is losing.",
+  "Wrong. You are shorter on answers than you are in the bedroom.",
+  "That answer was flaccid. Much like everything else about you.",
+  "Wrong, you stupid bitch. It is a for loop, not a fucking riddle.",
+  "That is not an answer, that is fucking bullshit with a question mark on it.",
+  "Wrong. The CPU read your answer, got confused, then felt genuinely sorry for you.",
+  "Bold. Wrong. But bold. Same confidence you have when you say you can go all night.",
+  "The semicolon you forgot is laughing at you. It is the only thing around here that gets finished.",
+  "You are thick as pig shit, and honestly that is less of a turn off than the other thing.",
+  "Wrong. At this rate the donkey gets a crown and you get a mop and a lifetime alone.",
+  "Wrong. Even your right hand is embarrassed for you right now."
 ];
 
 /* ==========================================================
@@ -669,7 +702,7 @@ function shuffleOpts(q){
 /* ==========================================================
    5. STATE
    ========================================================== */
-const S = {i:0, score:0, lives:3, zen:false, locked:false, wrong:[], perRound:{1:[0,0],2:[0,0],3:[0,0],4:[0,0]}, t0:0};
+const S = {i:0, score:0, lives:3, zen:false, locked:false, paused:false, wrong:[], ans:[], t0:0};
 
 function qs(){ return Q[S.i]; }
 function roundOf(r){ return ROUNDS.find(x=>x.n===r); }
@@ -683,22 +716,24 @@ function renderTop(){
     `<span class="banana${i < look ? "" : " dead"}">🍌</span>`
   ).join("");
   $("#scoreBox").textContent = S.score + " pt";
+
   const q = qs();
   $("#roundName").textContent = roundOf(q.r).tag;
   $("#qCount").textContent = (S.i+1) + " / " + Q.length;
 
+  const prev = $("#prevQ"), nxt = $("#nextQ");
+  if(prev) prev.disabled = (S.i === 0);
+  if(nxt) nxt.disabled = (!S.ans[S.i] || S.i >= Q.length-1);
+
   const prog = $("#prog");
   prog.innerHTML = "";
   ROUNDS.forEach(r=>{
+    const idx = Q.map((x,i)=> x.r===r.n ? i : -1).filter(i=>i>=0);
+    const done = idx.filter(i=> S.ans[i]).length;
+    const pct = Math.round(done/idx.length*100);
     const el = document.createElement("span");
-    const idx = Q.filter(x=>x.r===r.n);
-    const done = idx.filter(x=>Q.indexOf(x) < S.i).length;
-    if(q.r === r.n){
-      el.className = "now";
-      el.style.setProperty("--p", (done/idx.length*100)+"%");
-    } else if(done === idx.length){
-      el.className = "done";
-    }
+    el.className = (pct === 100) ? "done" : (q.r === r.n ? "now" : "");
+    el.style.setProperty("--p", pct + "%");
     el.innerHTML = "<i></i>";
     prog.appendChild(el);
   });
@@ -737,57 +772,78 @@ function renderQ(){
       if(e.key === "Enter" && (e.ctrlKey || e.metaKey)){ e.preventDefault(); submitType(); }
     });
   }
+
+  const rec = S.ans[S.i];
+  if(rec) replay(q, rec);
   renderTop();
+}
+
+/* show an already-answered question again, without scoring it twice */
+function replay(q, rec){
+  S.locked = true;
+  if(q.t === "mcq"){
+    document.querySelectorAll(".opt").forEach(b=>{
+      b.disabled = true;
+      if(b.dataset.ok === "true") b.classList.add("good");
+      if(!rec.ok && Number(b.dataset.i) === rec.pick) b.classList.add("bad");
+    });
+  } else {
+    const t = $("#typeIn");
+    if(t){ t.value = rec.pick; t.disabled = true; }
+    const cb = $("#checkBtn");
+    if(cb) cb.classList.add("hide");
+  }
+  showFeedback(rec.ok, q, true);
 }
 
 function pickLine(arr){
   return arr[(S.i * 3 + (arr === ROAST ? 1 : 0)) % arr.length];
 }
 
+function record(ok, pick){
+  const q = qs();
+  S.ans[S.i] = {ok: ok, pick: pick};
+  if(ok){ S.score++; }
+  else {
+    S.wrong.push({i:S.i+1, label:q.label, r:q.r});
+    if(!S.zen) S.lives--;
+  }
+}
+
 function answer(ok, btn){
   if(S.locked) return;
   S.locked = true;
   const q = qs();
-
-  if(q.t === "mcq"){
-    document.querySelectorAll(".opt").forEach(b=>{
-      b.disabled = true;
-      if(b.dataset.ok === "true") b.classList.add("good");
-    });
-    if(!ok && btn) btn.classList.add("bad");
-  }
-
-  S.perRound[q.r][1]++;
-  if(ok){ S.score++; S.perRound[q.r][0]++; }
-  else { S.wrong.push({i:S.i+1, label:q.label, r:q.r}); if(!S.zen) S.lives--; }
-
-  showFeedback(ok, q);
+  document.querySelectorAll(".opt").forEach(b=>{
+    b.disabled = true;
+    if(b.dataset.ok === "true") b.classList.add("good");
+  });
+  if(!ok && btn) btn.classList.add("bad");
+  record(ok, btn ? Number(btn.dataset.i) : -1);
+  showFeedback(ok, q, false);
   renderTop();
 }
 
 function submitType(){
   if(S.locked) return;
   const q = qs();
-  const val = norm($("#typeIn").value);
-  if(!val) { $("#typeIn").focus(); return; }
+  const raw = $("#typeIn").value;
+  const val = norm(raw);
+  if(!val){ $("#typeIn").focus(); return; }
   const ok = q.accept.some(a=>norm(a) === val);
   S.locked = true;
   $("#typeIn").disabled = true;
   $("#checkBtn").classList.add("hide");
-  answer2(ok, q);
-}
-
-/* mcq path goes through answer(); type path needs the same scoring without button juggling */
-function answer2(ok, q){
-  S.perRound[q.r][1]++;
-  if(ok){ S.score++; S.perRound[q.r][0]++; }
-  else { S.wrong.push({i:S.i+1, label:q.label, r:q.r}); if(!S.zen) S.lives--; }
-  showFeedback(ok, q);
+  record(ok, raw.trim());
+  showFeedback(ok, q, false);
   renderTop();
 }
 
-function showFeedback(ok, q){
+function showFeedback(ok, q, replaying){
   const host = $("#qHost");
+  const existing = host.querySelector(".fb");
+  if(existing) existing.remove();
+
   const line = ok ? pickLine(PRAISE) : pickLine(ROAST);
   const div = document.createElement("div");
   div.className = "fb " + (ok ? "ok" : "no");
@@ -804,20 +860,34 @@ ${esc(q.show)}</div>`;
   div.innerHTML = inner;
   host.appendChild(div);
 
-  if(!ok){
+  if(!ok && !replaying){
     div.classList.add("shake");
     if(navigator.vibrate) navigator.vibrate(60);
   }
   $("#nextBtn").addEventListener("click", next);
-  setTimeout(()=>div.scrollIntoView({behavior:"smooth", block:"nearest"}), 60);
+  if(!replaying) setTimeout(()=>div.scrollIntoView({behavior:"smooth", block:"nearest"}), 60);
 
-  if(!S.zen && S.lives <= 0){ setTimeout(finish, 1500); }
+  if(!ok && !replaying && !S.zen && S.lives <= 0){ setTimeout(finish, 1600); }
 }
 
 function next(){
-  if(!S.zen && S.lives <= 0){ return; }
+  if(!S.zen && S.lives <= 0) return;
+  if(S.i >= Q.length-1){ finish(); return; }
   S.i++;
-  if(S.i >= Q.length){ finish(); return; }
+  renderQ();
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+/* browse backwards and forwards through answered questions */
+function goPrevQ(){
+  if(S.i === 0) return;
+  S.i--;
+  renderQ();
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+function goNextQ(){
+  if(!S.ans[S.i] || S.i >= Q.length-1) return;
+  S.i++;
   renderQ();
   window.scrollTo({top:0, behavior:"smooth"});
 }
@@ -826,6 +896,7 @@ function next(){
    7. RESULT
    ========================================================== */
 function finish(){
+  S.paused = false;
   const total = Q.length;
   const pct = Math.round(S.score / total * 100);
   const win = pct >= 70;
@@ -834,12 +905,11 @@ function finish(){
 
   let bars = "";
   ROUNDS.forEach(r=>{
-    const [got, of] = S.perRound[r.n];
-    if(!of){
-      bars += `<div class="bar"><span>${r.name}</span><span class="track"></span><span>0/${r.total}</span></div>`;
-      return;
-    }
-    const p = Math.round(got/of*100);
+    const idx = Q.map((x,i)=> x.r===r.n ? i : -1).filter(i=>i>=0);
+    const of = idx.length;
+    const got = idx.filter(i=> S.ans[i] && S.ans[i].ok).length;
+    const played = idx.filter(i=> S.ans[i]).length;
+    const p = played ? Math.round(got/played*100) : 0;
     const cls = p >= 70 ? "" : (p >= 40 ? "low" : "bad");
     bars += `<div class="bar"><span>${r.name}</span><span class="track"><span class="fill ${cls}" style="width:${p}%"></span></span><span>${got}/${of}</span></div>`;
   });
@@ -854,8 +924,8 @@ function finish(){
 
   const title = win ? "AMMAR THE BANANA KING" : (S.lives <= 0 ? "THE DONKEY HAS ARRIVED" : "NOT QUITE, MATE");
   const sub = win
-    ? "70% or above, and that is enough to walk into the exam calm."
-    : "Under 70%. Read the cheat sheet once, then run it again. You've got this - you just need one more pass.";
+    ? "70% or above. Barely. You passed, which says more about the marking scheme than about you. Don't let it go to your head, the real paper is worse."
+    : "Under 70%. Sit down, shut up, read the cheat sheet, and run it again. You're not stupid, you're just lazy, and lazy is fixable.";
 
   $("#scr-res").innerHTML = `
     <div class="res">
@@ -871,6 +941,7 @@ function finish(){
         <button class="btn btn-ghost" id="sheetBtn2">Cheat sheet</button>
         <button class="btn btn-ghost" id="copyBtn">Copy result</button>
       </div>
+      <button class="btn btn-ghost" id="homeBtn" style="margin-top:9px">Back to home</button>
       <p class="footnote">Screenshot this and send it to Mo.</p>
     </div>`;
 
@@ -880,6 +951,11 @@ function finish(){
 
   $("#againBtn").addEventListener("click", reset);
   $("#sheetBtn2").addEventListener("click", openSheet);
+  $("#homeBtn").addEventListener("click", ()=>{
+    $("#scr-res").classList.add("hide");
+    $("#scr-intro").classList.remove("hide");
+    S.paused = false; updateIntro(); window.scrollTo({top:0});
+  });
   $("#copyBtn").addEventListener("click", ()=>{
     const txt = `C-CS111 midterm practice: ${S.score}/${total} (${pct}%) in ${mm}:${ss}. ${win ? "Banana King." : "Donkey."}`;
     navigator.clipboard.writeText(txt).then(()=>{
@@ -893,11 +969,45 @@ function finish(){
    8. FLOW
    ========================================================== */
 function reset(){
-  S.i = 0; S.score = 0; S.lives = 3; S.locked = false; S.wrong = [];
-  S.perRound = {1:[0,0],2:[0,0],3:[0,0],4:[0,0]};
+  S.i = 0; S.score = 0; S.lives = 3; S.locked = false; S.wrong = []; S.paused = false; S.ans = [];
   S.t0 = Date.now();
   $("#scr-res").classList.add("hide");
   $("#scr-intro").classList.add("hide");
+  $("#scr-quiz").classList.remove("hide");
+  renderQ();
+  window.scrollTo({top:0});
+}
+
+function resumable(){
+  return S.paused && S.i > 0 && S.i < Q.length;
+}
+
+function updateIntro(){
+  const live = resumable();
+  $("#startBtn").textContent = live ? "RESUME" : "START";
+  $("#resumeNote").classList.toggle("hide", !live);
+  $("#restartLink").classList.toggle("hide", !live);
+  if(live){
+    $("#resumeNote").textContent =
+      `Paused on question ${S.i+1} of ${Q.length}. ${S.score} points banked, ${S.zen ? "zen mode" : S.lives + " bananas left"}.`;
+  }
+}
+
+function goHome(){
+  if(S.locked){ S.i++; S.locked = false; }
+  if(S.i >= Q.length){ finish(); return; }
+  S.paused = true;
+  $("#scr-quiz").classList.add("hide");
+  $("#scr-res").classList.add("hide");
+  $("#scr-intro").classList.remove("hide");
+  updateIntro();
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function resumeQuiz(){
+  S.paused = false;
+  $("#scr-intro").classList.add("hide");
+  $("#scr-res").classList.add("hide");
   $("#scr-quiz").classList.remove("hide");
   renderQ();
   window.scrollTo({top:0});
@@ -916,7 +1026,11 @@ function buildSheet(){
     </details>`).join("");
 }
 
-$("#startBtn").addEventListener("click", reset);
+$("#startBtn").addEventListener("click", ()=>{ resumable() ? resumeQuiz() : reset(); });
+$("#restartLink").addEventListener("click", reset);
+$("#backBtn").addEventListener("click", goHome);
+$("#prevQ").addEventListener("click", goPrevQ);
+$("#nextQ").addEventListener("click", goNextQ);
 $("#sheetBtn1").addEventListener("click", openSheet);
 $("#sheetClose").addEventListener("click", closeSheet);
 $("#sheet").addEventListener("click", e=>{ if(e.target.id === "sheet") closeSheet(); });
