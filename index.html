@@ -701,7 +701,11 @@ function hl(code){
 }
 
 function norm(s){
-  return s.toLowerCase().replace(/[,\u060C]/g," ").replace(/\s+/g," ").trim();
+  let t = s.toLowerCase().replace(/[,\u060C]/g," ");
+  t = t.replace(/\s+/g," ").trim();
+  // ignore spacing around operators, so "n=1" and "n = 1" both count
+  t = t.replace(/\s*([=+:.!*\/()<>-])\s*/g, "$1");
+  return t;
 }
 function seeded(n){
   let s = n * 9301 + 49297;
